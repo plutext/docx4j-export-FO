@@ -78,12 +78,12 @@ public class PStyle11PtInTableOverrideTrueTest extends PStyleTableAbstract {
 		wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().setContents(
 				(Styles)XmlUtils.unmarshalString(styles_no_font_sz) );
 		
-		// NB createVirtualStylesForDocDefaults() puts 10pt there, if nothing is specified!
-		// So we need to delete that!
-		wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().createVirtualStylesForDocDefaults();
-		Style dd = wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().getStyleById("DocDefaults");
-		dd.getRPr().setSz(null);
-		dd.getRPr().setSzCs(null);
+//		// NB createVirtualStylesForDocDefaults() puts 10pt there, if nothing is specified!
+//		// So we need to delete that!
+//		wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().createVirtualStylesForDocDefaults();
+//		Style dd = wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().getStyleById("DocDefaults");
+//		dd.getRPr().setSz(null);
+//		dd.getRPr().setSzCs(null);
 		
 		setSetting(wordMLPackage, OVERRIDE);  // table style should get overridden
 	

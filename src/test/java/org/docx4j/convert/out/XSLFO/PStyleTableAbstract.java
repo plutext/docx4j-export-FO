@@ -60,6 +60,9 @@ public abstract class PStyleTableAbstract {
 		 * 
 		 * Note that createVirtualStylesForDocDefaults() puts 10pt there, if nothing is specified,
 		 * so we save the docx here before that method has run.
+		 * 
+		 * TODO 2016 01 18 revisit this, since createVirtualStylesForDocDefaults has gone now
+		 * (its only in StyleTree)
 		 */
 		wordMLPackage.save(new File(System.getProperty("user.dir") + "/OUT_PStyleInTableTest.docx"));
 //		this.saveDocx(wordMLPackage, null);

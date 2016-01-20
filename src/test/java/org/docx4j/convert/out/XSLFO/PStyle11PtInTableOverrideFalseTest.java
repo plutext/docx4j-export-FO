@@ -88,12 +88,12 @@ public class PStyle11PtInTableOverrideFalseTest extends PStyleTableAbstract {
 
 		wordMLPackage.save(new File(System.getProperty("user.dir") + "/OUT_PStyleInTableTest.docx"));
 		
-		// NB createVirtualStylesForDocDefaults() puts 10pt there, if nothing is specified!
-		// So we need to delete that!
-		wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().createVirtualStylesForDocDefaults();
-		Style dd = wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().getStyleById("DocDefaults");
-		dd.getRPr().setSz(null);
-		dd.getRPr().setSzCs(null);
+//		// NB createVirtualStylesForDocDefaults() puts 10pt there, if nothing is specified!
+//		// So we need to delete that!
+//		wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().createVirtualStylesForDocDefaults();
+//		Style dd = wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().getStyleById("DocDefaults");
+//		dd.getRPr().setSz(null);
+//		dd.getRPr().setSzCs(null);
 		
 		ParagraphStylesInTableFix.process(wordMLPackage);
 		

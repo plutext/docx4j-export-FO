@@ -125,12 +125,12 @@ public class PStyle12PtInTableNormalOverrideFalseTest extends PStyleTableAbstrac
 		// TODO make this change in other AllSilent tests
 
 		
-		// NB createVirtualStylesForDocDefaults() puts 10pt there, if nothing is specified!
-		// So we need to delete that!
-		wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().createVirtualStylesForDocDefaults();
-		Style dd = wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().getStyleById("DocDefaults");
-		dd.getRPr().setSz(null);
-		dd.getRPr().setSzCs(null);
+//		// NB createVirtualStylesForDocDefaults() puts 10pt there, if nothing is specified!
+//		// So we need to delete that!
+//		wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().createVirtualStylesForDocDefaults();
+//		Style dd = wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().getStyleById("DocDefaults");
+//		dd.getRPr().setSz(null);
+//		dd.getRPr().setSzCs(null);
 		
 		
 		ParagraphStylesInTableFix.process(wordMLPackage);
