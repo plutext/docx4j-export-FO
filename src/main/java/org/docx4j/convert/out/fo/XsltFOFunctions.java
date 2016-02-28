@@ -216,7 +216,7 @@ public class XsltFOFunctions {
                 // Do it...
             	Element el = (Element)sourceNode;
             	if (el.getLocalName().equals(elementName)) {
-            		System.out.println("Got " + elementName);
+//            		log.debug("Got " + elementName);
             		return true;
             	}
 
@@ -627,7 +627,7 @@ public class XsltFOFunctions {
     protected static void setFont(FOConversionContext context, Element foListItemLabelBody, PPr pPr, RPr rPr, String text) {
     	
     	DocumentFragment result = (DocumentFragment)context.getRunFontSelector().fontSelector(pPr, rPr, text);
-    	System.out.println(XmlUtils.w3CDomNodeToString(result));
+    	log.debug(XmlUtils.w3CDomNodeToString(result));
     	// eg <fo:inline xmlns:fo="http://www.w3.org/1999/XSL/Format" font-family="Times New Roman">1)</fo:inline>
     	
     	// Now get the attribute value

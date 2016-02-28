@@ -131,7 +131,7 @@ public abstract class AbstractFOExporter extends AbstractWmlExporter<FOSettings,
 		    	    
 		    	    if (Character.isHighSurrogate(c1)) {
 		    	    	// Process this and the next
-						System.out.println("added as code point OK");
+						log.debug("added as code point OK");
 						
 	//				   	char c2 = foDocument.charAt(i+1);
 	//				   	
@@ -141,7 +141,7 @@ public abstract class AbstractFOExporter extends AbstractWmlExporter<FOSettings,
 	//				   			String.format("%04x", (int) c2));					
 						
 		    	    } else if (c1=='#') {
-		    	    	System.out.println("Unintended " + foDocument.substring(i-1, i+7) + "?"); 
+		    	    	log.debug("Unintended " + foDocument.substring(i-1, i+7) + "?"); 
 		    	    }
 				}
 			}
