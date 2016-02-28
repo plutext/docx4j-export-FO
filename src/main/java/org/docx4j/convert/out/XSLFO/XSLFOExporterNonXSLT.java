@@ -102,52 +102,6 @@ public class XSLFOExporterNonXSLT {
 		return ret;
 	}
 	
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) throws Exception {
-
-		String inputfilepath;	
-		String outputfilepath;		
-
-		inputfilepath = System.getProperty("user.dir")
-//				+ "/hlink.docx";
-//		+ "/OpenXML_1ed_Part4.docx";
-//		+ "/sample-docs/word/sample-docx.docx";
-//		+ "/sample-docs/word/2003/word2003-vml.docx";
-//				+ "/table-nested.docx";
-//		+ "/sample-docs/word/headers.docx";
-		+ "/sample-docs/word/sample-docxv2.docx";		
-		
-		WordprocessingMLPackage wmlPackage = WordprocessingMLPackage
-				.load(new java.io.File(inputfilepath));
-		
-		FOSettings pdfSettings = new FOSettings();
-		pdfSettings.setWmlPackage(wmlPackage);
-		
-		
-		XSLFOExporterNonXSLT withoutXSLT = new XSLFOExporterNonXSLT(wmlPackage, 
-				pdfSettings);		
-//		new PDFConversionImageHandler(settings.getImageDirPath(), true) : 
-//				new HTMLConversionImageHandler("c:\\temp", "/bar", true) );
-		
-
-		
-		long startTime = System.currentTimeMillis();				
-		Document xslfo = withoutXSLT.export();
-		long endTime = System.currentTimeMillis();
-		log.info("done.  elapsed time: " + Math.round((endTime-startTime)/1000) );
-
-		log.info(XmlUtils.w3CDomNodeToString(xslfo));
-		
-		
-		outputfilepath = inputfilepath + "K.pdf";
-		OutputStream os = new java.io.FileOutputStream(outputfilepath);
-		
-		// OK, do it...
-		withoutXSLT.output(xslfo, os, null);
-		System.out.println("Saved " + outputfilepath);	
-	}
 
 // ========================================================================	
 	public void output(Document xslfo, OutputStream os, Configuration fopConfigZZZ) throws Docx4JException {
