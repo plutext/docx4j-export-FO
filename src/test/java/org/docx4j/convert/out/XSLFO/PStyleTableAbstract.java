@@ -17,8 +17,44 @@ import org.docx4j.wml.PPrBase.PStyle;
 import org.docx4j.wml.Style;
 import org.docx4j.wml.Styles;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * w:compatSetting[w:name="overrideTableStyleFontSizeAndJustification"]
+ * is defined in [MS-DOCX] 
+ * 
+ * If this value is true, then the style hierarchy of the document is evaluated as specified 
+ * in [ISO/IEC29500-1:2011] section 17.7.2.
+
+	If this value is false, which is the default, then the following additional rules apply:
+	
+	If the default paragraph style (as specified in [ISO/IEC29500-1:2011] section 17.7.4.17) 
+	specifies a font size of 11pt or 12pt, then that setting will not override the font size 
+	specified by the table style for paragraphs in tables.
+	
+		// That's wrong; this additional rule only applies if the font size is 12pt (not 11pt!).
+		// Tested in Word 2010 
+	
+	If the default paragraph style (as specified in [ISO/IEC29500-1:2011] section 17.7.4.17) 
+	specifies a justification of left, then that setting will not override the justification 
+	specified by the table style for paragraphs in tables.
+	  
+ * The philosophy seems to be that inside a table cell, Normal didn't apply.
+ * 
+ * NB: there are fairly comprehensive test cases in src/test/java
+ * for the behaviour with font size (where in each case the expected
+ * result is set on the basis of what Word does). There aren't any at the moment for
+ * justification (which is assumed to follow the same logic we have here).
+ * 
+ * Where Normal is basedOn our DocDefaults style, Word *does* override the table style!
+ * We'll ignore that for now, because the next version of docx4j (v3.3) 
+ * stops creating a DocDefaults style. 
+ */
 public abstract class PStyleTableAbstract {
+	
+	protected static Logger log = LoggerFactory.getLogger(PStyleTableAbstract.class);	
+	
 	
 	protected static boolean OVERRIDE;
 	protected static int EXPECTED_RESULT;
@@ -48,7 +84,12 @@ public abstract class PStyleTableAbstract {
 		wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().setContents(
 				(Styles)XmlUtils.unmarshalString(styleXml) );
 		
-		setSetting(wordMLPackage, OVERRIDE);  // table style should not get overridden
+		setSetting(wordMLPackage, OVERRIDE); 
+		if (OVERRIDE) {
+			log.info("table style should get overridden by Normal");
+		} else {
+			log.info("table style should NOT get overridden by Normal");			
+		}
 
 		/* Where Normal is basedOn our DocDefaults style,  
 		 * Word *does* override the table style! 
@@ -68,7 +109,7 @@ public abstract class PStyleTableAbstract {
 //		this.saveDocx(wordMLPackage, null);
 		
 		ParagraphStylesInTableFix.process(wordMLPackage);
-		
+				
 //		// Now remove the style, and save the docx, to check in Word
 //		Style s = getStyle(wordMLPackage, STYLE_NAME);
 //		wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().getContents().getStyle().remove(s);
@@ -78,9 +119,41 @@ public abstract class PStyleTableAbstract {
 //		this.saveDocx(wordMLPackage, null);
 		
 		Style s = getStyle(wordMLPackage, STYLE_NAME);
-		Assert.assertTrue(s.getRPr().getSz().getVal().intValue()==expectedResult);
+
+		if (s==null) {
+			log.warn("missing style " + STYLE_NAME);
+			Assert.fail("missing style " + STYLE_NAME);
+		} else {		
+			assertSz(s, expectedResult);
+		}
 		
 		return wordMLPackage;
+		
+	}
+	
+	protected void assertSz(Style s, int expectedResult) {
+		
+		if (s.getRPr()!=null
+				&& s.getRPr().getSz()!=null
+				&& s.getRPr().getSz().getVal()!=null) {
+			int actualResult = s.getRPr().getSz().getVal().intValue();
+			Assert.assertTrue(actualResult==expectedResult);
+		} else if (s.getRPr()!=null
+				&& s.getRPr().getSz()==null) {
+			log.warn("null Sz: " + XmlUtils.marshaltoString(s));
+			Assert.fail("null Sz");
+		}
+		
+	}
+
+	protected void assertSzNull(Style s) {
+		
+		if (s.getRPr()==null) {
+			
+		} else if (s.getRPr()!=null) {
+			
+			Assert.assertNull(s.getRPr().getSz());
+		}
 		
 	}
 	

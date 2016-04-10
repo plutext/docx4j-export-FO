@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PStyle12PtInTableNormalOverrideTrueTest extends PStyleTableAbstract {
 	
-	protected static Logger log = LoggerFactory.getLogger(ParagraphStylesInTableFix.class);	
+	protected static Logger log = LoggerFactory.getLogger(PStyle12PtInTableNormalOverrideTrueTest.class);	
 	
 /* Test cases:
  * 
@@ -73,6 +73,10 @@ public class PStyle12PtInTableNormalOverrideTrueTest extends PStyleTableAbstract
 	
 	}
 
+	/**
+	 * Normal 12 pt
+	 * @throws Exception
+	 */
 	@Test
 	public void testTblStyle_Normal() throws Exception {
 	
@@ -105,17 +109,13 @@ public class PStyle12PtInTableNormalOverrideTrueTest extends PStyleTableAbstract
 		
 		wordMLPackage.save(new File(System.getProperty("user.dir") + "/OUT_PStyleInTableTest.docx"));
 		
-//		// NB createVirtualStylesForDocDefaults() puts 10pt there, if nothing is specified!
-//		// So we need to delete that!
-//		wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().createVirtualStylesForDocDefaults();
-//		Style dd = wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().getStyleById("DocDefaults");
-//		dd.getRPr().setSz(null);
-//		dd.getRPr().setSzCs(null);
+		// NB PropertyResolver puts 10pt in DocDefaults, if nothing is specified!
 		
 		ParagraphStylesInTableFix.process(wordMLPackage);
 		
 		Style s = getStyle(wordMLPackage, STYLE_NAME);
-		Assert.assertTrue(s.getRPr().getSz()==null); 
+		this.assertSz(s, 20);
+//		Assert.assertTrue(s.getRPr().getSz().getVal().intValue()==20); 
 	}
 	
 	@Test 
@@ -198,7 +198,9 @@ public class PStyle12PtInTableNormalOverrideTrueTest extends PStyleTableAbstract
 		}
 		
 //		Style s = getStyle(wordMLPackage, STYLE_NAME);
-		Assert.assertTrue(ours.getRPr().getSz().getVal().intValue()==EXPECTED_RESULT); 
+		
+		this.assertSz(ours, EXPECTED_RESULT);
+		
 	}
 
 	@Test

@@ -59,6 +59,8 @@ public class PStyle12PtInTableGridOverrideTrueTest extends PStyleTableAbstract {
 		
 		initTbls(true);
 		initOtherXml();		
+		
+		STYLE_NAME = "Normal-TableGrid-BR";
 	}
 	
 
@@ -91,6 +93,12 @@ public class PStyle12PtInTableGridOverrideTrueTest extends PStyleTableAbstract {
 		test(mdpXml_tblStyle, styles_inDefaultParagraphFont, 40);
 	}
 
+	/**
+	 * table says 40, p says nothing
+	 * should override, but nothing explicit, so we don't
+	 * 
+	 * @throws Exception
+	 */
 	@Test 
 	public void testTblStyle_AllSilent() throws Exception {
 	
@@ -114,7 +122,8 @@ public class PStyle12PtInTableGridOverrideTrueTest extends PStyleTableAbstract {
 		ParagraphStylesInTableFix.process(wordMLPackage);
 		
 		Style s = getStyle(wordMLPackage, STYLE_NAME);
-		Assert.assertTrue(s.getRPr().getSz().getVal().intValue()==40); 
+		this.assertSz(s, 40); // nothing explicit to override with, so use table val
+		
 	}
 	
 	@Test 

@@ -59,6 +59,8 @@ public class PStyle12PtInTableGridOverrideFalseTest extends PStyleTableAbstract 
 		
 		initTbls(true);
 		initOtherXml();
+		
+		STYLE_NAME = "Normal-TableGrid-BR";
 	}
 
 	
@@ -112,30 +114,30 @@ public class PStyle12PtInTableGridOverrideFalseTest extends PStyleTableAbstract 
 		
 	}
 
+	/**
+	 * table says 40, Normal says nothing.
+	 * don't override table style
+	 * @throws Exception
+	 */
 	@Test 
 	public void testTblStyle_AllSilent() throws Exception {
-		
+				
 		WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
 		wordMLPackage.getMainDocumentPart().setContents(
 				(Document)XmlUtils.unmarshalString(mdpXml_tblStyle) );
 		wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().setContents(
 				(Styles)XmlUtils.unmarshalString(styles_no_font_sz) );
 		
-//		// NB createVirtualStylesForDocDefaults() puts 10pt there, if nothing is specified!
-//		// So we need to delete that!
-//		wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().createVirtualStylesForDocDefaults();
-//		Style dd = wordMLPackage.getMainDocumentPart().getStyleDefinitionsPart().getStyleById("DocDefaults");
-//		dd.getRPr().setSz(null);
-//		dd.getRPr().setSzCs(null);
+//		// NB PropertyResolver puts 10pt in DocDefaults, if nothing is specified!
 		
-		setSetting(wordMLPackage, OVERRIDE); 
+		setSetting(wordMLPackage, OVERRIDE); // resulting text in table is 40pt
 
 		wordMLPackage.save(new File(System.getProperty("user.dir") + "/OUT_PStyleInTableTest.docx"));
 		
 		ParagraphStylesInTableFix.process(wordMLPackage);
 		
 		Style s = getStyle(wordMLPackage, STYLE_NAME);
-		Assert.assertTrue(s.getRPr().getSz().getVal().intValue()==EXPECTED_RESULT); 
+		this.assertSz(s, 40);
 	}
 	
 	@Test 

@@ -7,7 +7,9 @@ import java.io.ByteArrayOutputStream;
 import org.docx4j.Docx4J;
 import org.docx4j.convert.out.FOSettings;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.junit.Assert;
 import org.junit.Test;
+import org.xml.sax.SAXParseException;
 
 public class TblHeaderTest extends AbstractXSLFOTest {
 
@@ -42,10 +44,16 @@ public class TblHeaderTest extends AbstractXSLFOTest {
 //		System.out.println(new String(bytes, "UTF-8"));
 	
 		// Now use XPath to assert it has a table-body
-		org.w3c.dom.Document domDoc = w3cDomDocumentFromByteArray( bytes);
+		try {
+			org.w3c.dom.Document domDoc = w3cDomDocumentFromByteArray( bytes);
+			assertTrue(this.isAbsent(domDoc, "//fo:table-header"));
+			assertTrue(this.isPresent(domDoc, "//fo:table-body"));
+		} catch (SAXParseException e) {
+			
+			Assert.fail(e.getMessage());
+			Assert.fail(new String(bytes, "UTF-8"));
+		}
 		
-		assertTrue(this.isAbsent(domDoc, "//fo:table-header"));
-		assertTrue(this.isPresent(domDoc, "//fo:table-body"));
 		
 	}
 	
@@ -80,10 +88,17 @@ public class TblHeaderTest extends AbstractXSLFOTest {
 //		System.out.println(new String(bytes, "UTF-8"));
 	
 		// Now use XPath to assert it has a table-body
-		org.w3c.dom.Document domDoc = w3cDomDocumentFromByteArray( bytes);
+		try {
+			org.w3c.dom.Document domDoc = w3cDomDocumentFromByteArray( bytes);
+			assertTrue(this.isAbsent(domDoc, "//fo:table-body[following-sibling::fo:table-header]"));
+			assertTrue(this.isPresent(domDoc, "//fo:table-header[following-sibling::fo:table-body]"));
+		} catch (SAXParseException e) {
+			
+			Assert.fail(e.getMessage());
+			Assert.fail(new String(bytes, "UTF-8"));
+		}
 		
-		assertTrue(this.isAbsent(domDoc, "//fo:table-body[following-sibling::fo:table-header]"));
-		assertTrue(this.isPresent(domDoc, "//fo:table-header[following-sibling::fo:table-body]"));
+		
 		
 	}
 	    

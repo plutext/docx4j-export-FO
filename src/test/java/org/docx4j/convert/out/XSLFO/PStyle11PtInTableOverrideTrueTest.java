@@ -92,7 +92,16 @@ public class PStyle11PtInTableOverrideTrueTest extends PStyleTableAbstract {
 		ParagraphStylesInTableFix.process(wordMLPackage);
 		
 		Style s = getStyle(wordMLPackage, STYLE_NAME);
-		Assert.assertTrue(s.getRPr().getSz().getVal().intValue()==40); 
+		//Assert.assertTrue(s.getRPr().getSz().getVal().intValue()==40); 		
+		
+		if (s==null) {
+			log.warn("missing style " + STYLE_NAME);
+			Assert.fail("missing style " + STYLE_NAME);
+		} else {		
+			this.assertSz(s, 40);
+		}		
+		
+		
 	}
 	
 	@Test 
