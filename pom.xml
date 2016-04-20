@@ -313,7 +313,7 @@
 		<dependency>
 			<groupId>org.docx4j</groupId>
 			<artifactId>docx4j</artifactId>
-			<version>3.3.0-SNAPSHOT</version>
+			<version>3.3.0</version>
 		</dependency>
 	
 		<dependency>
@@ -456,8 +456,16 @@
 
 	</dependencies>
 
-
-
+<!-- 
+<distributionManagement>
+    <repository>
+        <id>internal.repo</id>
+        <name>Temporary Staging Repository</name>
+        <url>file://${project.build.directory}/mvn-repo</url>
+    </repository>
+</distributionManagement>
+ -->
+ 
 	<profiles> <!--  use -P eg mvn -Psign-artifacts  -->
 		<profile>
 			<id>sign-artifacts</id>
@@ -487,27 +495,39 @@
 			 See http://stackoverflow.com/questions/14013644/hosting-a-maven-repository-on-github
 			 
 			 To do this:
-			 0. change outputDirectory, for a clean jar
+			 0. uncomment distribution management above
 			 1. comment out parent element (top of pom), since this is what makes deploy push to https://oss.sonatype.org
 			 2. comment out maven-javadoc-plugin, since its not worth bothering with that large upload
 			 3. execute 
 			  
-			       mvn clean deploy -DskipTests -Pgithub-mvn-repo
+			       mvn clean deploy  -Pgithub-mvn-repo
 		
 		 -->		
 		<profile>
 			<id>github-mvn-repo</id>
 			<build>
+			
 				<plugins>
+				
+				    <plugin>
+				        <artifactId>maven-deploy-plugin</artifactId>
+				        <version>2.8.1</version>
+				        <configuration>
+				            <altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
+				        </configuration>
+				    </plugin>
+				
 			        <plugin>
 			            <groupId>com.github.github</groupId>
 			            <artifactId>site-maven-plugin</artifactId>
-			            <version>0.8</version>
+			            <version>0.12</version>
 			            <configuration>
+			            	<server>github</server>
+			            	<merge>true</merge>
 			                <message>Maven artifacts for ${project.version}</message>  <!-- git commit message -->
 			                <noJekyll>true</noJekyll>                                  <!-- disable webpage processing -->
 			                <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
-			                <branch>refs/heads/mvn-repo</branch>                       <!-- remote branch name -->
+			                <branch>refs/heads/mvn-repo</branch>                        <!-- remote branch name -->
 			                <includes><include>**/*</include></includes>
 			                <repositoryName>docx4j</repositoryName>      <!-- github repo name -->
 			                <repositoryOwner>plutext</repositoryOwner>    <!-- github username  -->

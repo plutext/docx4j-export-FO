@@ -122,7 +122,7 @@ public class ConvertOutPDFviaXSLFO extends AbstractSample {
 			// Create a docx
 			System.out.println("No imput path passed, creating dummy document");
 			 wordMLPackage = WordprocessingMLPackage.createPackage();
-			 SampleDocument.createContent(wordMLPackage.getMainDocumentPart());	
+			 SampleDocumentGenerator.createContent(wordMLPackage.getMainDocumentPart());	
 		} else {
 			// Load .docx or Flat OPC .xml
 			System.out.println("Loading file from " + inputfilepath);
