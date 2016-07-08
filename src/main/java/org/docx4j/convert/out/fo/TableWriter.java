@@ -27,6 +27,7 @@ import org.docx4j.convert.out.common.writer.AbstractTableWriter;
 import org.docx4j.convert.out.common.writer.AbstractTableWriterModel;
 import org.docx4j.convert.out.common.writer.AbstractTableWriterModelCell;
 import org.docx4j.model.properties.Property;
+import org.docx4j.model.table.TableModelCell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -135,15 +136,29 @@ public class TableWriter extends AbstractTableWriter {
   	@Override
 	protected void applyTableCellCustomAttributes(AbstractWmlConversionContext context, AbstractTableWriterModel table, 
 			TransformState transformState, 
-			AbstractTableWriterModelCell tableCell, Element cellNode, boolean isHeader, boolean isDummyCell) {
+			TableModelCell tableCell, Element cellNode, boolean isHeader, boolean isDummyCell) {
   		
   		if (isDummyCell) {
 			cellNode.setAttribute("border-style", "none");
 			cellNode.setAttribute("background-color", "transparent");
 			cellNode.appendChild(cellNode.getOwnerDocument().createElementNS("http://www.w3.org/1999/XSL/Format", "fo:block"));
+			return;
+			/* return prevents
+
+				 org.apache.fop.fo.ValidationException: The column-number or number of cells in the row overflows the number of fo:table-columns specified for the table. 
+					at org.apache.fop.events.ValidationExceptionFactory.createException(ValidationExceptionFactory.java:38)
+					at org.apache.fop.events.EventExceptionManager.throwException(EventExceptionManager.java:58)
+					at org.apache.fop.events.DefaultEventBroadcaster$1.invoke(DefaultEventBroadcaster.java:175)
+					at $Proxy37.tooManyCells(Unknown Source)
+					at org.apache.fop.fo.flow.table.TableCellContainer.addTableCellChild(TableCellContainer.java:75)
+					
+				review whether this is the correct fix.
+					
+			*/
   		}
   		
 		if (tableCell.getExtraCols() > 0) {
+			
 			cellNode.setAttribute("number-columns-spanned", Integer.toString(tableCell.getExtraCols() + 1));
 			
 		}
