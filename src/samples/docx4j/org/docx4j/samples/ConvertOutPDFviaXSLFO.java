@@ -130,8 +130,9 @@ public class ConvertOutPDFviaXSLFO extends AbstractSample {
 		}
 		
 		// Refresh the values of DOCPROPERTY fields 
-		FieldUpdater updater = new FieldUpdater(wordMLPackage);
-		updater.update(true);
+		FieldUpdater updater = null;
+//		updater = new FieldUpdater(wordMLPackage);
+//		updater.update(true);
 		
 		// Set up font mapper (optional)
 		Mapper fontMapper = new IdentityPlusMapper();
@@ -179,7 +180,7 @@ public class ConvertOutPDFviaXSLFO extends AbstractSample {
 		// (XSLT takes longer, but is more complete).
 		
 		// Don't care what type of exporter you use
-		Docx4J.toFO(foSettings, os, Docx4J.FLAG_EXPORT_PREFER_NONXSL);
+		Docx4J.toFO(foSettings, os, Docx4J.FLAG_EXPORT_PREFER_XSL);
 		
 		// Prefer the exporter, that uses a xsl transformation
 		// Docx4J.toFO(foSettings, os, Docx4J.FLAG_EXPORT_PREFER_XSL);
