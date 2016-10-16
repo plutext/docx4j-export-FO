@@ -314,14 +314,20 @@ public class FORendererApacheFOP extends AbstractFORenderer { //implements FORen
 			method = fopFactoryBuilderClass.getDeclaredMethod("build", new Class[0] );
 			
 			fopFactory = (FopFactory)method.invoke(fopFactoryBuilder);
+
+			log.debug("FOP 2.1 configured OK." );
 			
 		} catch (Exception e) {
-			log.warn("Can't set up FOP svn; " + e.getMessage() );
-			log.debug(e.getMessage(), e);
+			log.error("Can't set up FOP 2.1; " + e.getMessage() );
+			log.error("Please verify you have fop 2.1, batik 1.8 and jaxb-xslfo jars on your classpath." );
+			log.error(e.getMessage(), e);
+			e.printStackTrace();
 			// eg java.lang.ClassNotFoundException: org.apache.fop.apps.FopConfParser
 			
 			// legacy FOP 1.0 or 1.1 config.
 			try {
+				log.error("Falling back to try FOP 1.1|1.0...");
+
 				Method method;
 				Class[] params = new Class[1];
 
@@ -337,8 +343,12 @@ public class FORendererApacheFOP extends AbstractFORenderer { //implements FORen
 				DefaultConfigurationBuilder cfgBuilder = new DefaultConfigurationBuilder();
 				
 				method.invoke(fopFactory, cfgBuilder.build(is) );
+
+				log.debug("Legacy FOP configured OK." );
 				
 			} catch (Exception e1) {
+				log.error("FOP not found; neither 2.1 nor earlier.  Can't convert FO to PDF." );
+				log.error(e.getMessage(), e);
 				e1.printStackTrace();
 				
 				// java.lang.IllegalAccessException: Class org.docx4j.fonts.fop.util.FopFactoryUtil 
