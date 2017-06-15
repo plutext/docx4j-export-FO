@@ -2,6 +2,30 @@ CHANGELOG
 =========
 
 
+Version 3.3.4 (minor release)
+===============
+
+Release date
+------------
+
+15 June 2017
+
+
+Notable Changes in Version 3.3.4
+---------------------------------
+
+No changes, except pom uses docx4j 3.3.4
+
+
+Compatibility notes
+-------------------
+
+Version number 3.3.4 assigned, to align with docx4j release number
+of same date.
+
+docx4j 3.3.4 or later recommended (though 3.3.1 or later ought to work)
+
+
 Version 3.3.1
 =============
 
