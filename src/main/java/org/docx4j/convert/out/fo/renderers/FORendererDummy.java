@@ -44,7 +44,7 @@ public class FORendererDummy extends AbstractFORenderer { // implements FORender
 		return INSTANCE;
 	}
 	
-	@Override
+	//@Override
 	public void render(String foDocument, FOSettings settings,
 			boolean twoPass,
 			List<SectionPageInformation> pageNumberInformation,
