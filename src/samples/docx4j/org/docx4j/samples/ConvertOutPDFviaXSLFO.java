@@ -22,8 +22,11 @@ package org.docx4j.samples;
 
 import java.io.OutputStream;
 
+import org.apache.fop.apps.FOUserAgent;
+import org.apache.fop.apps.FopFactory;
 import org.docx4j.Docx4J;
 import org.docx4j.convert.out.FOSettings;
+import org.docx4j.convert.out.fo.renderers.FORendererApacheFOP;
 import org.docx4j.fonts.IdentityPlusMapper;
 import org.docx4j.fonts.Mapper;
 import org.docx4j.fonts.PhysicalFont;
@@ -120,7 +123,7 @@ public class ConvertOutPDFviaXSLFO extends AbstractSample {
 		WordprocessingMLPackage wordMLPackage;
 		if (inputfilepath==null) {
 			// Create a docx
-			System.out.println("No imput path passed, creating dummy document");
+			System.out.println("No input path passed, creating dummy document");
 			 wordMLPackage = WordprocessingMLPackage.createPackage();
 			 SampleDocumentGenerator.createContent(wordMLPackage.getMainDocumentPart());	
 		} else {
@@ -159,6 +162,11 @@ public class ConvertOutPDFviaXSLFO extends AbstractSample {
 		}
 		foSettings.setWmlPackage(wordMLPackage);
 		
+	    FOUserAgent foUserAgent = FORendererApacheFOP.getFOUserAgent(foSettings);
+	    // configure foUserAgent as desired
+	    foUserAgent.setAccessibility(true);
+	    foUserAgent.setTitle("my title");
+	    
 		// Document format: 
 		// The default implementation of the FORenderer that uses Apache Fop will output
 		// a PDF document if nothing is passed via 
