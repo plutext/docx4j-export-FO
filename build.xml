@@ -7,7 +7,7 @@
     <property name="source" value="1.5"/>
 	<property name="dist" value="./dist"/>
 	
-	<property name="version" value="3.3.4"/>
+	<property name="version" value="3.3.6"/>
 	
     <property name="jar-name" value="docx4j-export-fo-${version}"/>
     <property name="release.dir" value="docx4j-export-fo-${version}"/>
@@ -49,7 +49,7 @@
 	 
     <path id="FOP-stuff.classpath">
 
-        <pathelement location="${m2Repository}/org/apache/xmlgraphics/fop/2.1/fop-2.1.jar"/>
+        <pathelement location="${m2Repository}/org/apache/xmlgraphics/fop/2.2/fop-2.2.jar"/>
         <pathelement location="${m2Repository}/org/apache/xmlgraphics/batik-svg-dom/1.8/batik-svg-dom-1.8.jar"/>
         <pathelement location="${m2Repository}/org/apache/xmlgraphics/batik-css/1.8/batik-css-1.8.jar"/>
         <pathelement location="${m2Repository}/org/apache/xmlgraphics/batik-dom/1.8/batik-dom-1.8.jar"/>
@@ -102,7 +102,7 @@
     </path>
     
     <path id="docx4j.classpath">
-        <pathelement location="${m2Repository}/org/docx4j/docx4j/3.3.4/docx4j-3.3.4.jar"/>
+        <pathelement location="${m2Repository}/org/docx4j/docx4j/3.3.6/docx4j-3.3.6.jar"/>
         <path refid="Maven Dependencies.libraryclasspath"/>
     </path>
 

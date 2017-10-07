@@ -2,6 +2,24 @@ CHANGELOG
 =========
 
 
+Version 3.3.6 (minor release)
+===============
+
+Release date
+------------
+
+7 October 2017
+
+
+Notable Changes in Version 3.3.6
+---------------------------------
+
+Use FOP 2.2
+
+Expose FOUserAgent, so user can set accessibility
+
+
+
 Version 3.3.4 (minor release)
 ===============
 

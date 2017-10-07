@@ -10,7 +10,7 @@
   
 	<groupId>org.docx4j</groupId>
 	<artifactId>docx4j-export-fo</artifactId>
-	<version>3.3.5-SNAPSHOT</version>
+	<version>3.3.6-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>docx4j-export-fo</name>
 	
@@ -313,7 +313,7 @@
 		<dependency>
 			<groupId>org.docx4j</groupId>
 			<artifactId>docx4j</artifactId>
-			<version>3.3.5</version>
+			<version>3.3.6</version>
 		</dependency>
 	
 		<dependency>
