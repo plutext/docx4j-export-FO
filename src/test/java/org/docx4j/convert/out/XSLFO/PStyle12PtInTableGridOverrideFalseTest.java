@@ -60,7 +60,6 @@ public class PStyle12PtInTableGridOverrideFalseTest extends PStyleTableAbstract 
 		initTbls(true);
 		initOtherXml();
 		
-		STYLE_NAME = "Normal-TableGrid-BR";
 	}
 
 	
@@ -136,7 +135,7 @@ public class PStyle12PtInTableGridOverrideFalseTest extends PStyleTableAbstract 
 		
 		ParagraphStylesInTableFix.process(wordMLPackage);
 		
-		Style s = getStyle(wordMLPackage, STYLE_NAME);
+		Style s = getStyle(wordMLPackage, getStyleName());
 		this.assertSz(s, 40);
 	}
 	
