@@ -568,7 +568,7 @@ public class XsltFOFunctions {
 				
 			}
 			
-			{
+			if (rPr!=null) {
 				
 				if (foListBlock==null) {
 					createFoAttributes(context.getWmlPackage(), rPr, ((Element)foBlockElement) );
