@@ -32,7 +32,7 @@ import org.w3c.dom.Node;
 
 /** Generate a reference so that the w:bookmarkStart it can be referenced.<br>
  *  The preprocessing step BookmarkMover should have moved any Bookmarks 
- *  to the beginning of a paragraph, therefore a inline should allways work.
+ *  to the beginning of a paragraph, therefore an inline should always work.
  */
 public class BookmarkStartWriter extends AbstractBookmarkStartWriter {
 	private final static Logger log = LoggerFactory.getLogger(BookmarkStartWriter.class);
