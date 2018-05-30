@@ -44,6 +44,7 @@ import org.docx4j.openpackaging.parts.WordprocessingML.DocumentSettingsPart;
 import org.docx4j.wml.CTPageNumber;
 import org.docx4j.wml.CTTabStop;
 import org.docx4j.wml.CTTwipsMeasure;
+import org.docx4j.wml.HpsMeasure;
 import org.docx4j.wml.JcEnumeration;
 import org.docx4j.wml.PPr;
 import org.docx4j.wml.PPrBase.NumPr.Ilvl;
@@ -325,12 +326,24 @@ public class XsltFOFunctions {
     				if (log.isDebugEnabled()) {
     					log.debug("getting rPr for paragraph style");
     				}
-    				rPr = propertyResolver.getEffectiveRPr(null, pPrDirect); 
-    					// rPr in pPr direct formatting only applies to paragraph mark, 
-    					// and by virtue of that, to list item label,
-    					// so pass null here
+
+					// rPr in pPr direct formatting only applies to paragraph mark, 
+					// and by virtue of that, to list item label,
+					// so pass null here.				
+					// 2018 05, actually, sz also affects line spacing (eg 12 pt on block
+            		// with 11 pt inside would have more space), so its important
+            		RPr fontSzOnlyRPr = new RPr();
+            		if (pPrDirect.getRPr()!=null && pPrDirect.getRPr().getSz()!=null) {
+            			HpsMeasure hm = new HpsMeasure(); 
+            			hm.setVal( pPrDirect.getRPr().getSz().getVal() ); // does this suffice as a copy?
+                		fontSzOnlyRPr.setSz(hm);
+            		}
+            		
+            		rPr = propertyResolver.getEffectiveRPr(fontSzOnlyRPr, pPrDirect);
+            		
     				// Now, work out the value for list item label
             		rPrParagraphMark = XmlUtils.deepCopy(rPr);
+    				
 //        			System.out.println("p rpr-->" + XmlUtils.marshaltoString(pPrDirect.getRPr()));
             		
             		StyleUtil.apply(pPrDirect.getRPr(), rPrParagraphMark); 
@@ -552,10 +565,10 @@ public class XsltFOFunctions {
 				boolean ignoreBorders = !sdt;
 
 				createFoAttributes(context.getWmlPackage(), pPr, ((Element)foBlockElement), indentHandledByNumbering, ignoreBorders );
+				
 			}
-
 			
-			if (rPr!=null) {
+			{
 				
 				if (foListBlock==null) {
 					createFoAttributes(context.getWmlPackage(), rPr, ((Element)foBlockElement) );
