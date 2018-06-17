@@ -27,7 +27,9 @@ import org.docx4j.convert.out.common.writer.AbstractTableWriter;
 import org.docx4j.convert.out.common.writer.AbstractTableWriterModel;
 import org.docx4j.convert.out.common.writer.AbstractTableWriterModelCell;
 import org.docx4j.model.properties.Property;
+import org.docx4j.model.properties.table.tc.TextDir;
 import org.docx4j.model.table.TableModelCell;
+import org.docx4j.wml.TcPr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -177,5 +179,47 @@ public class TableWriter extends AbstractTableWriter {
   		rowContainer.setAttribute("start-indent", "0in");
   		
   	}
+  	
+    /**
+     * In the FO case, if we need to rotate the text, we do that
+     * by inserting a block-container.
+     * 
+     * @param cellNode
+     * @return
+     */
+  	@Override
+    protected Element interposeBlockContainer(Document doc, Element cellNode, TcPr tcPr) {
+    	
+  		if (tcPr.getTextDirection()==null) {
+  			// usual case
+  			return cellNode;
+  		} else {
+  			
+  			/* We need block-container, something like:
+  			 * 
+	          <table-cell>
+	            <block-container reference-orientation="90">
+	              <block>Hello</block>
+	            </block-container>
+	          </table-cell>
+            */
+  			
+  			Element ret = doc.createElementNS("http://www.w3.org/1999/XSL/Format", "fo:block-container");
+  			
+  			TextDir textDir = new TextDir(tcPr.getTextDirection());
+  			textDir.setXslFO(ret);
+  			
+  			cellNode.appendChild(ret);
+  			
+  			if (cellNode.hasAttribute("reference-orientation")) {
+  				// remove it, since it doesn't work at that level
+  				cellNode.removeAttribute("reference-orientation");
+  			}
+  			
+  			return ret;
+  			
+  		}
+    }
+  	
 	
 }
