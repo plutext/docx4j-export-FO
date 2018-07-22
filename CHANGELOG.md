@@ -2,6 +2,33 @@ CHANGELOG
 =========
 
 
+Version 6.0.0
+=============
+
+Release date
+------------
+
+22 July 2018
+
+
+Changes in Version 6.0.0
+------------------------
+
+Docx4j 6.x will be the last series supporting Java 6.  
+(docx4j 7.x, when released, will require Java 7+) 
+
+This itself is a minor release (it is numbered 6.0.0 to align with docx4j,
+which is a more significant release).  You can use export-fo 6.0.0 with
+docx4j 6.0.x (and 3.3.x, though 6.0.x is recommended) 
+
+Use FOP and XmlGraphics 2.3 
+
+Take paragraph mark font size into account when setting font size on block. This is important, since it affects line spacing.
+
+Support tcPr/textDirection (rotated text in table cell), though more work is 
+required for FOP to position the text in the cell!
+
+
 Version 3.3.6 (minor release)
 ===============
 
