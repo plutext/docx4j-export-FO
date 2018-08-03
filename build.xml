@@ -3,11 +3,11 @@
     <property environment="env"/>
     <property name="junit.output.dir" value="junit"/>
     <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.5"/>
-    <property name="source" value="1.5"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
 	<property name="dist" value="./dist"/>
 	
-	<property name="version" value="6.0.0"/>
+	<property name="version" value="6.0.1"/>
 	
     <property name="jar-name" value="docx4j-export-fo-${version}"/>
     <property name="release.dir" value="docx4j-export-fo-${version}"/>
@@ -86,7 +86,7 @@
     </path>
     
     <path id="docx4j.classpath">
-        <pathelement location="${m2Repository}/org/docx4j/docx4j/6.0.0/docx4j-6.0.0.jar"/>
+        <pathelement location="${m2Repository}/org/docx4j/docx4j/6.0.1/docx4j-6.0.1.jar"/>
         <path refid="Maven Dependencies.libraryclasspath"/>
     </path>
 

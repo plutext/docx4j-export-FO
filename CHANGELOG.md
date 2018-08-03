@@ -1,6 +1,21 @@
 CHANGELOG
 =========
 
+Version 6.0.1
+=============
+
+Release date
+------------
+
+3 August 2018
+
+
+Changes in Version 6.0.1
+------------------------
+
+Depends on docx4j 6.0.1 (since docx4j 6.0.0 should be avoided).
+
+
 
 Version 6.0.0
 =============
