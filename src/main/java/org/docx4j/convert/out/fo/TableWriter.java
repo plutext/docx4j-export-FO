@@ -190,7 +190,7 @@ public class TableWriter extends AbstractTableWriter {
   	@Override
     protected Element interposeBlockContainer(Document doc, Element cellNode, TcPr tcPr) {
     	
-  		if (tcPr.getTextDirection()==null) {
+  		if (tcPr==null || tcPr.getTextDirection()==null) {
   			// usual case
   			return cellNode;
   		} else {
