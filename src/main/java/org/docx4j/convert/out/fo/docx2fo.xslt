@@ -13,6 +13,7 @@
 	xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
 	xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"
 	xmlns:fo="http://www.w3.org/1999/XSL/Format"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"		
     version="1.0"
         exclude-result-prefixes="java w a o v WX aml w10 pkg wp pic r">	
 
@@ -892,6 +893,22 @@
    </xsl:template>
 
    <xsl:template match="w:customXmlPr" />  
+
+  <!--  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <!--  +++++++++++++++++++  alternate content     ++++++++++++++ -->
+  <!--  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<xsl:template match="mc:AlternateContent" >
+		<xsl:variable name="info" 
+			select="concat('mc:AlternateContent selecting Fallback ie ignoring mc:Choice Requires ', 
+					mc:Choice/@Requires, 
+					' containing ', 
+					local-name(mc:Choice/*[1]))"/>
+		<xsl:variable name="dummy"
+			select="java:org.docx4j.convert.out.common.XsltCommonFunctions.logInfo($conversionContext, 
+			$info)" />
+		<xsl:apply-templates select="mc:Fallback/*" />
+	</xsl:template>
 
   <!--  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
   <!--  +++++++++++++++++++  no match     +++++++++++++++++++++++ -->
