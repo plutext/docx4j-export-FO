@@ -13,6 +13,7 @@ v6.x series is the last which will support Java 6.
 
 ## Alternatives
 
-In docx4j v3.3.0, the default PDF Converter is an eval version of Plutext's commercial renderer, which offers
-much better fidelity and performance.  For more on this, please see https://converter-eval.plutext.com/
+Since docx4j v3.3.0, the default PDF Converter is an eval version of Plutext's commercial renderer, which takes 
+a completely different approach, to offer
+much better fidelity and performance.  For more on this, please see https://converter-eval.plutext.com/client_java.html
 

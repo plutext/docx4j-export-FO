@@ -1,6 +1,28 @@
 CHANGELOG
 =========
 
+
+Version 6.1.0
+=============
+
+Release date
+------------
+
+17 December 2018
+
+
+Changes in Version 6.1.0
+------------------------
+
+Refactor text box code (since FOP 2 supports fo:float)
+
+mc alternate content: select fallback
+
+Null check invoking tcPr.getTextDirection()
+
+
+
+
 Version 6.0.1
 =============
 
