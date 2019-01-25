@@ -164,7 +164,7 @@ public class ConvertOutPDFviaXSLFO extends AbstractSample {
 		
 	    FOUserAgent foUserAgent = FORendererApacheFOP.getFOUserAgent(foSettings);
 	    // configure foUserAgent as desired
-	    foUserAgent.setAccessibility(true);
+	    foUserAgent.setAccessibility(false); // suppress "missing language information" messages from FOUserAgent .processEvent
 	    foUserAgent.setTitle("my title");
 	    
 		// Document format: 
