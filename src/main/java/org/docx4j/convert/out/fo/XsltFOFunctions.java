@@ -27,6 +27,7 @@ import org.docx4j.XmlUtils;
 import org.docx4j.convert.out.common.AbstractWmlConversionContext;
 import org.docx4j.convert.out.common.ConversionSectionWrapper;
 import org.docx4j.convert.out.common.preprocess.Containerization;
+import org.docx4j.fonts.RunFontSelector;
 import org.docx4j.jaxb.Context;
 import org.docx4j.model.PropertyResolver;
 import org.docx4j.model.fields.FormattingSwitchHelper;
@@ -40,6 +41,7 @@ import org.docx4j.model.properties.paragraph.PBorderTop;
 import org.docx4j.model.properties.paragraph.PShading;
 import org.docx4j.model.styles.StyleUtil;
 import org.docx4j.openpackaging.packages.OpcPackage;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.DocumentSettingsPart;
 import org.docx4j.wml.CTPageNumber;
 import org.docx4j.wml.CTTabStop;
@@ -278,18 +280,19 @@ public class XsltFOFunctions {
 //    	log.info("childResults:" + childResults.getClass().getName() ); 
     	
     	
+		/* First, determine effective paragraph and run properties (pPr, rPr) */
+    	PPr pPrDirect = null;
+    	
+    	// Get the pPr node as a JAXB object,
+    	// so we can read it using our standard
+    	// methods.  Its a bit sad that we 
+    	// can't just adorn our DOM tree with the
+    	// original JAXB objects?
+    	PPr pPr = null;
+    	RPr rPr = null;
+    	RPr rPrParagraphMark = null;  // required for list item label
         try {
         	
-        	PPr pPrDirect = null;
-        	
-        	// Get the pPr node as a JAXB object,
-        	// so we can read it using our standard
-        	// methods.  Its a bit sad that we 
-        	// can't just adorn our DOM tree with the
-        	// original JAXB objects?
-        	PPr pPr = null;
-        	RPr rPr = null;
-        	RPr rPrParagraphMark = null;  // required for list item label
         	if (pPrNodeIt==null) {  // Never happens?        		
     			if (log.isDebugEnabled()) {
     				log.debug("Here after all!!");
@@ -354,226 +357,69 @@ public class XsltFOFunctions {
 			if (log.isDebugEnabled() && pPr!=null) {				
 				log.debug("P effective pPr: "+ XmlUtils.marshaltoString(pPr, true, true));					
 			}
-        	
+		} catch (Exception e) {
+			//log.error(e.getLocalizedMessage(), e);
+			log.error(e.getMessage(), e);
+	    	return null;
+		} 
+			
+		/* Now that we have pPr, we can format the block. */
+		return createBlock(context.getWmlPackage(), context.getRunFontSelector(), pStyleVal, childResults, sdt, pPrDirect, pPr, rPr, rPrParagraphMark); 
+    	    	
+    }
+
+	protected static DocumentFragment createBlock(WordprocessingMLPackage wmlPackage, RunFontSelector runFontSelector, 
+			String pStyleVal, NodeIterator childResults,
+			boolean sdt, PPr pPrDirect, PPr pPr, RPr rPr, RPr rPrParagraphMark) {
+
+        try {
             // Create a DOM builder and parse the fragment			
 			Document document = XmlUtils.getNewDocumentBuilder().newDocument();
-			
 			//log.info("Document: " + document.getClass().getName() );
 			
-			boolean indentHandledByNumbering = false;
-			
-			Element foBlockElement;
+			Element foBlockElement = document.createElementNS("http://www.w3.org/1999/XSL/Format", "fo:block");
 			Element foListBlock = null;
+			boolean indentHandledByNumbering = false;
+			// Is it a list item?
 			if (pPr!=null 
 					&& pPr.getNumPr()!=null 
 					&& pPr.getNumPr().getNumId()!=null
 					&& pPr.getNumPr().getNumId().getVal().longValue()!=0 //zero means no numbering
 					) {
 				
+				foListBlock = document.createElementNS("http://www.w3.org/1999/XSL/Format", "fo:list-block");
+				document.appendChild(foListBlock);
 				
 				// Its a list item.  At present we make a new list-block for
 				// each list-item. This is not great; DocumentModel will ultimately
 				// allow us to use fo:list-block properly.
 
-				/* Create something like:
-				 * 			
-					<fo:list-block provisional-distance-between-starts="0.5in" start-indent="0.5in">
-					  <fo:list-item>
-					    <fo:list-item-label>
-					      <fo:block font-family="Times New Roman">-</fo:block>
-					    </fo:list-item-label>
-					    <fo:list-item-body start-indent="body-start()">
-					      <fo:block font-family="Times New Roman" font-size="9.0pt" line-height="100%" space-after="0.08in" space-before="0.08in" text-align="justify">
-					        <inline xmlns="http://www.w3.org/1999/XSL/Format" id="clauseDPI5123341"/>Content goes here...
-					      </fo:block>
-					    </fo:list-item-body>
-					  </fo:list-item>
-					</fo:list-block>
-				 */				
-
-				foListBlock = document.createElementNS("http://www.w3.org/1999/XSL/Format", 
-						"fo:list-block");
-				document.appendChild(foListBlock);
-								
-//				foListBlock.setAttribute("provisional-distance-between-starts", "0.5in");
-				
-				// Need to apply shading at fo:list-block level
-				if (pPr.getShd()!=null) {
-					PShading pShading = new PShading(pPr.getShd());
-					pShading.setXslFO(foListBlock);
-				}
-				
-				Element foListItem = document.createElementNS("http://www.w3.org/1999/XSL/Format", 
-						"fo:list-item");
-				foListBlock.appendChild(foListItem);				
-
-				
-				Element foListItemLabel = document.createElementNS("http://www.w3.org/1999/XSL/Format", 
-						"fo:list-item-label");
-				foListItem.appendChild(foListItemLabel);
-				
-				Element foListItemLabelBody = document.createElementNS("http://www.w3.org/1999/XSL/Format", 
-						"fo:block");
-				foListItemLabel.appendChild(foListItemLabelBody);
-				
-				Element foListItemBody = document.createElementNS("http://www.w3.org/1999/XSL/Format", 
-						"fo:list-item-body");
-				foListItem.appendChild(foListItemBody);	
-				foListItemBody.setAttribute(Indent.FO_NAME, "body-start()");
-				
-	        	ResultTriple triple;
-	        	if (pPrDirect!=null && pPrDirect.getNumPr()!=null) {
-	        		triple = org.docx4j.model.listnumbering.Emulator.getNumber(
-	        			context.getWmlPackage(), pStyleVal, 
-	        			pPrDirect.getNumPr().getNumId().getVal().toString(), 
-	        			pPrDirect.getNumPr().getIlvl().getVal().toString() ); 
-	        	} else {
-	        		// Get the effective values; since we already know this,
-	        		// save the effort of doing this again in Emulator
-	        		Ilvl ilvl = pPr.getNumPr().getIlvl();
-	        		String ilvlString = ilvl == null ? "0" : ilvl.getVal().toString();
-	        		triple = null; 
-	        		if (pPr.getNumPr().getNumId()!=null) {
-		        		triple = org.docx4j.model.listnumbering.Emulator.getNumber(
-		        				context.getWmlPackage(), pStyleVal, 
-			        			pPr.getNumPr().getNumId().getVal().toString(), 
-			        			ilvlString ); 		        	
-	        		}
-	        	}
-	        	
-	        	
-				
-				if (triple==null) {
-					log.warn("computed number ResultTriple was null");
-	        		if (log.isDebugEnabled() ) {
-	        			foListItemLabelBody.setAttribute("color", "red");
-	        			foListItemLabelBody.setTextContent("null#");
-	        		} 
-	        	} else {
-
-	        		/* Format the list item label
-	        		 * 
-	        		 * Since it turns out (in FOP at least) that the label and the body 
-	        		 * don't have the same vertical alignment 
-	        		 * unless font size is applied at the same level
-	        		 * (ie to both -label and -body, or to the block inside each), 
-	        		 * we have to format the list-item-body as well.
-	        		 * This issue only manifests itself if the font size on
-	        		 * the outer list-block is larger than the font sizes
-	        		 * set inside it.
-	        		 */
-	        		
-        			// OK just to override specific values
-        			// Values come from numbering rPr, unless overridden in p-level rpr
-	        		if(triple.getRPr()==null) {
-	        			
-	        			if (pPr.getRPr()==null) {
-	        				// do nothing, since we're already inheriting the formatting in the style
-	        				// (as opposed to the paragraph mark formatting)
-	        				// EXCEPT for font
-//	        				setFont( context,  foListItemLabelBody, rPr.getRFonts()); 
-	        				setFont( context,  foListItemLabelBody,  pPr,  rPr,  triple.getNumString());
-	        			} else {
-	        				
-							createFoAttributes(context.getWmlPackage(), rPrParagraphMark, foListItemLabel );	        				
-							createFoAttributes(context.getWmlPackage(), rPrParagraphMark, foListItemBody );	
-							
-//	        				setFont( context,  foListItemLabelBody, rPrParagraphMark.getRFonts()); 	        				
-	        				setFont( context,  foListItemLabelBody,  pPr,  rPrParagraphMark,  triple.getNumString());
-	        			}
-	        			
-	        		} else {
-	        			RPr actual = XmlUtils.deepCopy(triple.getRPr()); // clone, so the ilvl rpr is not altered
-//	        			System.out.println(XmlUtils.marshaltoString(rPrParagraphMark));
-	        			
-	        			// pMark overrides numbering, except for font
-	        			// (which makes sense, since that would change the bullet)
-	        			// so set the font
-        				setFont( context,  foListItemLabelBody,  pPr,  actual,  triple.getNumString());
-        				// .. before taking rPrParagraphMark into account
-	            		StyleUtil.apply(rPrParagraphMark, actual); 
-//	        			System.out.println(XmlUtils.marshaltoString(actual));
-	            		
-						createFoAttributes(context.getWmlPackage(), actual, foListItemLabel );
-						createFoAttributes(context.getWmlPackage(), actual, foListItemBody );
-						
-	        		}
-	        			        		
-	        		
-        			int numChars=1;
-	        		if (triple.getBullet()!=null ) {
-		        		foListItemLabelBody.setTextContent(triple.getBullet() );
-		        	} else if (triple.getNumString()==null) {
-		        		log.debug("computed NumString was null!");
-		        		if (log.isDebugEnabled() ) {
-		        			foListItemLabelBody.setAttribute("color", "red");
-		        			foListItemLabelBody.setTextContent("null#");
-		        		} 
-		        		numChars=0;
-			    	} else {
-						Text number = document.createTextNode( triple.getNumString() );
-						foListItemLabelBody.appendChild(number);
-						numChars = triple.getNumString().length();
-			    	}
-	        		
-	        		// Indent (setting provisional-distance-between-starts)
-	        		// Indent on direct pPr trumps indent in pPr in numbering, which trumps indent
-	    			// specified in a style.  Well, not exactly, components which aren't set in
-	        		// the direct formatting will be contributed by the numbering's indent settings
-	        		Indent indent = new Indent(pPrDirect.getInd(), triple.getIndent());
-	        		if (indent.isHanging() ) {
-	    				indent.setXslFOListBlock(foListBlock, -1);	        			
-	        		} else {
-	        			
-	        			int numWidth = 90 * numChars; // crude .. TODO take font size into account
-	        			
-	        		    int pdbs = getDistanceToNextTabStop(context, indent.getNumberPosition(), numWidth,
-	        		    		pPrDirect.getTabs(), context.getWmlPackage().getMainDocumentPart().getDocumentSettingsPart());
-	    				indent.setXslFOListBlock(foListBlock, pdbs);	        				        			
-	        		}
-    				indentHandledByNumbering = true; 
-	        		
-//	        		// Set the font
-//	        		if (triple.getNumFont()!=null) {
-//	        			String font = PhysicalFonts.getPhysicalFont(context.getWmlPackage(), triple.getNumFont() );
-//	        			if (font!=null) {
-//	        				foListItemLabelBody.setAttribute("font-family", font );
-//	        			}
-//	        		}
-	        		
-	        	}
-				
-				
-				foBlockElement = document.createElementNS("http://www.w3.org/1999/XSL/Format", 
-						"fo:block");
-				foListItemBody.appendChild(foBlockElement);
+				indentHandledByNumbering = createListBlock(wmlPackage, runFontSelector, pStyleVal, pPrDirect, pPr, rPr,
+						rPrParagraphMark, document, foBlockElement, foListBlock);
 				
 				if (log.isDebugEnabled()) {
 					log.debug("bare list result: " + XmlUtils.w3CDomNodeToString(foListBlock) );
 				}
 				
 				
-			} else {
-
-				foBlockElement = document.createElementNS("http://www.w3.org/1999/XSL/Format", "fo:block");
+			} else /* its not a list item */ {
 				document.appendChild(foBlockElement);
 			}
 			
-							
+			/* Now apply pPr (whether its a list or not) */				
 			if (pPr!=null) {
 				// Ignore paragraph borders once inside the container
 				boolean ignoreBorders = !sdt;
-
-				createFoAttributes(context.getWmlPackage(), pPr, ((Element)foBlockElement), indentHandledByNumbering, ignoreBorders );
-				
+				createFoAttributes(wmlPackage, pPr, ((Element)foBlockElement), indentHandledByNumbering, ignoreBorders );				
 			}
 			
+			/* Now apply rPr */				
 			if (rPr!=null) {
 				
 				if (foListBlock==null) {
-					createFoAttributes(context.getWmlPackage(), rPr, ((Element)foBlockElement) );
+					createFoAttributes(wmlPackage, rPr, ((Element)foBlockElement) );
 				} else {
-					createFoAttributes(context.getWmlPackage(), rPr, ((Element)foListBlock) );					
+					createFoAttributes(wmlPackage, rPr, ((Element)foListBlock) );					
 				}
 	        }
 
@@ -606,7 +452,9 @@ public class XsltFOFunctions {
 				 * 
 				 * So instead of importNode, use 
 				 */
-				XmlUtils.treeCopy( n,  foBlockElement );
+	            ((Element)foBlockElement).setAttribute( "white-space-treatment", "preserve");
+	            ((Element)foBlockElement).setAttribute( "white-space-collapse", "false");
+	            XmlUtils.treeCopy( n,  foBlockElement );
 				
 			}
 			
@@ -622,11 +470,176 @@ public class XsltFOFunctions {
 		} catch (Exception e) {
 			//log.error(e.getLocalizedMessage(), e);
 			log.error(e.getMessage(), e);
-		} 
-    	
-    	return null;
-    	
-    }
+		}
+        return null;
+	}
+
+	protected static boolean createListBlock(WordprocessingMLPackage wmlPackage, RunFontSelector runFontSelector,
+			String pStyleVal, PPr pPrDirect, PPr pPr, RPr rPr, RPr rPrParagraphMark, Document document,
+			Element foBlockElement, Element foListBlock) {
+		
+		/* Create something like:
+		 * 			
+			<fo:list-block provisional-distance-between-starts="0.5in" start-indent="0.5in">
+			  <fo:list-item>
+			    <fo:list-item-label>
+			      <fo:block font-family="Times New Roman">-</fo:block>
+			    </fo:list-item-label>
+			    <fo:list-item-body start-indent="body-start()">
+			      <fo:block font-family="Times New Roman" font-size="9.0pt" line-height="100%" space-after="0.08in" space-before="0.08in" text-align="justify">
+			        <inline xmlns="http://www.w3.org/1999/XSL/Format" id="clauseDPI5123341"/>Content goes here...
+			      </fo:block>
+			    </fo:list-item-body>
+			  </fo:list-item>
+			</fo:list-block>
+		 */				
+						
+//				foListBlock.setAttribute("provisional-distance-between-starts", "0.5in");
+		
+		boolean indentHandledByNumbering = false;
+		
+		// Need to apply shading at fo:list-block level
+		if (pPr.getShd()!=null) {
+			PShading pShading = new PShading(pPr.getShd());
+			pShading.setXslFO(foListBlock);
+		}
+		
+		Element foListItem = document.createElementNS("http://www.w3.org/1999/XSL/Format", "fo:list-item");
+		foListBlock.appendChild(foListItem);				
+
+		
+		Element foListItemLabel = document.createElementNS("http://www.w3.org/1999/XSL/Format", "fo:list-item-label");
+		foListItem.appendChild(foListItemLabel);
+		
+		Element foListItemLabelBody = document.createElementNS("http://www.w3.org/1999/XSL/Format", "fo:block");
+		foListItemLabel.appendChild(foListItemLabelBody);
+		
+		Element foListItemBody = document.createElementNS("http://www.w3.org/1999/XSL/Format", "fo:list-item-body");
+		foListItem.appendChild(foListItemBody);	
+		foListItemBody.setAttribute(Indent.FO_NAME, "body-start()");
+		
+		ResultTriple triple;
+		if (pPrDirect!=null && pPrDirect.getNumPr()!=null) {
+			triple = org.docx4j.model.listnumbering.Emulator.getNumber(
+					wmlPackage, pStyleVal, 
+				pPrDirect.getNumPr().getNumId().getVal().toString(), 
+				pPrDirect.getNumPr().getIlvl().getVal().toString() ); 
+		} else {
+			// Get the effective values; since we already know this,
+			// save the effort of doing this again in Emulator
+			Ilvl ilvl = pPr.getNumPr().getIlvl();
+			String ilvlString = ilvl == null ? "0" : ilvl.getVal().toString();
+			triple = null; 
+			if (pPr.getNumPr().getNumId()!=null) {
+				triple = org.docx4j.model.listnumbering.Emulator.getNumber(
+						wmlPackage, pStyleVal, 
+		    			pPr.getNumPr().getNumId().getVal().toString(), 
+		    			ilvlString ); 		        	
+			}
+		}
+		
+		if (triple==null) {
+			log.warn("computed number ResultTriple was null");
+			if (log.isDebugEnabled() ) {
+				foListItemLabelBody.setAttribute("color", "red");
+				foListItemLabelBody.setTextContent("null#");
+			} 
+		} else {
+
+			/* Format the list item label
+			 * 
+			 * Since it turns out (in FOP at least) that the label and the body 
+			 * don't have the same vertical alignment 
+			 * unless font size is applied at the same level
+			 * (ie to both -label and -body, or to the block inside each), 
+			 * we have to format the list-item-body as well.
+			 * This issue only manifests itself if the font size on
+			 * the outer list-block is larger than the font sizes
+			 * set inside it.
+			 */
+			
+			// OK just to override specific values
+			// Values come from numbering rPr, unless overridden in p-level rpr
+			if(triple.getRPr()==null) {
+				
+				if (pPr.getRPr()==null) {
+					// do nothing, since we're already inheriting the formatting in the style
+					// (as opposed to the paragraph mark formatting)
+					// EXCEPT for font
+//	        				setFont( context,  foListItemLabelBody, rPr.getRFonts()); 
+					setFont( runFontSelector,  foListItemLabelBody,  pPr,  rPr,  triple.getNumString());
+				} else {
+					
+					createFoAttributes(wmlPackage, rPrParagraphMark, foListItemLabel );	        				
+					createFoAttributes(wmlPackage, rPrParagraphMark, foListItemBody );	
+					
+//	        				setFont( context,  foListItemLabelBody, rPrParagraphMark.getRFonts()); 	        				
+					setFont( runFontSelector,  foListItemLabelBody,  pPr,  rPrParagraphMark,  triple.getNumString());
+				}
+				
+			} else {
+				RPr actual = XmlUtils.deepCopy(triple.getRPr()); // clone, so the ilvl rpr is not altered
+//	        			System.out.println(XmlUtils.marshaltoString(rPrParagraphMark));
+				
+				// pMark overrides numbering, except for font
+				// (which makes sense, since that would change the bullet)
+				// so set the font
+				setFont( runFontSelector,  foListItemLabelBody,  pPr,  actual,  triple.getNumString());
+				// .. before taking rPrParagraphMark into account
+				StyleUtil.apply(rPrParagraphMark, actual); 
+//	        			System.out.println(XmlUtils.marshaltoString(actual));
+				
+				createFoAttributes(wmlPackage, actual, foListItemLabel );
+				createFoAttributes(wmlPackage, actual, foListItemBody );
+				
+			}
+				        		
+			
+			int numChars=1;
+			if (triple.getBullet()!=null ) {
+				foListItemLabelBody.setTextContent(triple.getBullet() );
+			} else if (triple.getNumString()==null) {
+				log.debug("computed NumString was null!");
+				if (log.isDebugEnabled() ) {
+					foListItemLabelBody.setAttribute("color", "red");
+					foListItemLabelBody.setTextContent("null#");
+				} 
+				numChars=0;
+			} else {
+				Text number = document.createTextNode( triple.getNumString() );
+				foListItemLabelBody.appendChild(number);
+				numChars = triple.getNumString().length();
+			}
+			
+			// Indent (setting provisional-distance-between-starts)
+			// Indent on direct pPr trumps indent in pPr in numbering, which trumps indent
+			// specified in a style.  Well, not exactly, components which aren't set in
+			// the direct formatting will be contributed by the numbering's indent settings
+			Indent indent = new Indent(pPrDirect.getInd(), triple.getIndent());
+			if (indent.isHanging() ) {
+				indent.setXslFOListBlock(foListBlock, -1);	        			
+			} else {
+				
+				int numWidth = 90 * numChars; // crude .. TODO take font size into account
+				
+			    int pdbs = getDistanceToNextTabStop(indent.getNumberPosition(), numWidth,
+			    		pPrDirect.getTabs(), wmlPackage.getMainDocumentPart().getDocumentSettingsPart());
+				indent.setXslFOListBlock(foListBlock, pdbs);	        				        			
+			}
+			indentHandledByNumbering = true; 
+			
+//	        		// Set the font
+//	        		if (triple.getNumFont()!=null) {
+//	        			String font = PhysicalFonts.getPhysicalFont(context.getWmlPackage(), triple.getNumFont() );
+//	        			if (font!=null) {
+//	        				foListItemLabelBody.setAttribute("font-family", font );
+//	        			}
+//	        		}
+			
+		}
+		foListItemBody.appendChild(foBlockElement);
+		return indentHandledByNumbering;
+	}
     
     /**
      * Use RunFontSelector to determine the correct font for the list item label.
@@ -637,9 +650,9 @@ public class XsltFOFunctions {
      * @param rPr
      * @param text
      */
-    protected static void setFont(FOConversionContext context, Element foListItemLabelBody, PPr pPr, RPr rPr, String text) {
+    protected static void setFont(RunFontSelector runFontSelector, Element foListItemLabelBody, PPr pPr, RPr rPr, String text) {
     	
-    	DocumentFragment result = (DocumentFragment)context.getRunFontSelector().fontSelector(pPr, rPr, text);
+    	DocumentFragment result = (DocumentFragment)runFontSelector.fontSelector(pPr, rPr, text);
     	log.debug(XmlUtils.w3CDomNodeToString(result));
     	// eg <fo:inline xmlns:fo="http://www.w3.org/1999/XSL/Format" font-family="Times New Roman">1)</fo:inline>
     	
@@ -654,7 +667,7 @@ public class XsltFOFunctions {
     }
     
     
-    protected static int getDistanceToNextTabStop(FOConversionContext context, int pos, int numWidth, Tabs pprTabs, DocumentSettingsPart settings) {
+    protected static int getDistanceToNextTabStop( int pos, int numWidth, Tabs pprTabs, DocumentSettingsPart settings) {
     	// Also used by FOExporterVisitorGenerator, so should be moved
     	    	
 		int pdbs = 0; 

@@ -382,13 +382,13 @@ public class FOExporterVisitorGenerator extends AbstractVisitorExporterGenerator
 	        				// do nothing, since we're already inheriting the formatting in the style
 	        				// (as opposed to the paragraph mark formatting)
 	        				// EXCEPT for font
-	        				XsltFOFunctions.setFont( conversionContext,  foListItemLabelBody, pPr, rPr,  triple.getNumString());        				
+	        				XsltFOFunctions.setFont( conversionContext.getRunFontSelector(),  foListItemLabelBody, pPr, rPr,  triple.getNumString());        				
 	        			} else {
 
 	        				createFoAttributes(conversionContext.getWmlPackage(), rPrParagraphMark, foListItemLabel );	        				
 	        				createFoAttributes(conversionContext.getWmlPackage(), rPrParagraphMark, foListItemBody );
 	        				
-							XsltFOFunctions.setFont( conversionContext,  foListItemLabelBody, pPr, rPrParagraphMark,  triple.getNumString());	        				
+							XsltFOFunctions.setFont( conversionContext.getRunFontSelector(),  foListItemLabelBody, pPr, rPrParagraphMark,  triple.getNumString());	        				
 	        			}
 	        			
 	        		} else {
@@ -398,7 +398,7 @@ public class FOExporterVisitorGenerator extends AbstractVisitorExporterGenerator
 	        			// pMark overrides numbering, except for font
 	        			// (which makes sense, since that would change the bullet)
 	        			// so set the font
-	        			XsltFOFunctions.setFont( conversionContext,  foListItemLabelBody,  pPr,  actual,  triple.getNumString());
+	        			XsltFOFunctions.setFont( conversionContext.getRunFontSelector(),  foListItemLabelBody,  pPr,  actual,  triple.getNumString());
         				// .. before taking rPrParagraphMark into account
 	            		StyleUtil.apply(rPrParagraphMark, actual); 
 //	        			System.out.println(XmlUtils.marshaltoString(actual));
@@ -445,7 +445,7 @@ public class FOExporterVisitorGenerator extends AbstractVisitorExporterGenerator
         			
         			int numWidth = 90 * numChars; // crude .. TODO take font size into account
         			
-        		    int pdbs = XsltFOFunctions.getDistanceToNextTabStop(conversionContext, indent.getNumberPosition(), numWidth,
+        		    int pdbs = XsltFOFunctions.getDistanceToNextTabStop(indent.getNumberPosition(), numWidth,
         		    		pPrDirect.getTabs(), conversionContext.getWmlPackage().getMainDocumentPart().getDocumentSettingsPart());
     				indent.setXslFOListBlock(foListBlock, pdbs);	        				        			
         		}

@@ -95,7 +95,7 @@ public class FOConversionContext extends AbstractWmlConversionContext {
 		this.foRenderer = initializeFoRenderer(settings);
 	}
 	
-	private static RunFontSelector createRunFontSelector(WordprocessingMLPackage wmlPackage) {
+	protected static RunFontSelector createRunFontSelector(WordprocessingMLPackage wmlPackage) {
 		
 		return new RunFontSelector(wmlPackage, 
 				
