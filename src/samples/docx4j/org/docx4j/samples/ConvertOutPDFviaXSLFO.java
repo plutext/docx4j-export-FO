@@ -27,6 +27,7 @@ import org.apache.fop.apps.FopFactory;
 import org.docx4j.Docx4J;
 import org.docx4j.convert.out.FOSettings;
 import org.docx4j.convert.out.fo.renderers.FORendererApacheFOP;
+import org.docx4j.fonts.BestMatchingMapper;
 import org.docx4j.fonts.IdentityPlusMapper;
 import org.docx4j.fonts.Mapper;
 import org.docx4j.fonts.PhysicalFont;
@@ -139,6 +140,7 @@ public class ConvertOutPDFviaXSLFO extends AbstractSample {
 		
 		// Set up font mapper (optional)
 		Mapper fontMapper = new IdentityPlusMapper();
+//		Mapper fontMapper = new BestMatchingMapper();
 		wordMLPackage.setFontMapper(fontMapper);
 		
 		// .. example of mapping font Times New Roman which doesn't have certain Arabic glyphs
@@ -164,8 +166,16 @@ public class ConvertOutPDFviaXSLFO extends AbstractSample {
 		
 	    FOUserAgent foUserAgent = FORendererApacheFOP.getFOUserAgent(foSettings);
 	    // configure foUserAgent as desired
-	    foUserAgent.setAccessibility(false); // suppress "missing language information" messages from FOUserAgent .processEvent
 	    foUserAgent.setTitle("my title");
+	    
+//	    foUserAgent.getRendererOptions().put("pdf-a-mode", "PDF/A-1b");
+	    // is easier than 
+//		foSettings.setApacheFopConfiguration(apacheFopConfiguration);
+	    
+	    // PDF/A-1a, PDF/A-2a and PDF/A-3a require accessibility to be enabled
+	    // see further https://stackoverflow.com/a/54587413/1031689
+//	    foUserAgent.setAccessibility(true); // suppress "missing language information" messages from FOUserAgent .processEvent
+	    
 	    
 		// Document format: 
 		// The default implementation of the FORenderer that uses Apache Fop will output
